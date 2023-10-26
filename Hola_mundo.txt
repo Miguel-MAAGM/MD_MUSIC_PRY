@@ -1,0 +1,28 @@
+import asyncio
+import websockets
+import json
+import random
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+X = np.random.rand(100, 1000)
+xs = np.mean(X, axis=1)
+ys = np.std(X, axis=1)
+
+fig, ax = plt.subplots()
+ax.set_title('click on point to plot time series')
+line, = ax.plot(xs, ys, 'o', picker=True, pickradius=5)  # 5 points tolerance
+
+
+def onpick(event):
+ 
+    print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
+          ('double' if event.dblclick else 'single', event.button,
+           event.x, event.y, event.xdata, event.ydata))
+    return True
+
+
+fig.canvas.mpl_connect('button_press_event', onpick)
+plt.show()

@@ -26,6 +26,7 @@ def isNewclient(address):
 def handle_client(client_socket, client_address):
     # Recibe datos del cliente
     FLAG =True
+    print("\n NEW DEVICE CONECTED : ")
     try:
         while FLAG:
 
@@ -35,15 +36,17 @@ def handle_client(client_socket, client_address):
                 break
             if data == b'\r\n':
                 break
-            print( threading.current_thread())
             
             try:
                 # Decodifica los datos JSON
                 if is_json(data.decode('utf-8')):
                     json_data = json.loads(data.decode('utf-8'))
+                    name=json_data["nombre"]
+                    print(f"{name}\n")
                     client_data = {
                     "client": client_address,
-                    "name": json_data["nombre"]
+                    "Type": json_data["type"],
+                    "Name": json_data["nombre"]
                     }
                     connections_data.append(client_data)
                 else:
@@ -105,17 +108,18 @@ def read_console_input():
                 break
             print(switch_case(input_data))
         except EOFError:
-            # Se captura el EOFError y se maneja adecuadamente
-
+            # Se captura el EOFError y se maneja adecuadamente   
             print("Entrada de usuario finalizada.")
-
+            
 def main():
+
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((HOST, PORT))
     server.listen(5)
     print(f"Servidor escuchando en {HOST}:{PORT}")
     console_input_thread = threading.Thread(target=read_console_input)
     console_input_thread.start()
+
     while True:
         client_socket, client_address = server.accept()
         
@@ -129,5 +133,6 @@ def main():
         
 
 if __name__ == "__main__":
+
     main()
     

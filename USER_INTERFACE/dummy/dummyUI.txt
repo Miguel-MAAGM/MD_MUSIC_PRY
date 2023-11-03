@@ -1,11 +1,3 @@
-# Draggable rectangle with blitting.
-import NOAA_DATA
-import numpy as np
-import matplotlib.pyplot as plt
-import customtkinter as ctk
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-
-
 class MyPanel(ctk.CTkFrame):
     def __init__(self, master, round=10):
         super().__init__(master)
@@ -46,26 +38,3 @@ class MyPanel(ctk.CTkFrame):
             self.after(10, self.animate_backwards)
         else:
             self.in_start_pos = True
-
-        
-
-
-class App(ctk.CTk):
-    def __init__(self):
-        super().__init__()
-        self.geometry("400x400")
-        self.myFrame=MyPanel(self,round=100)
-        self.myFrame.pack()
-        self.frame= ctk.CTkFrame(self,
-                                 width=200,
-                                 height=200,
-                                 corner_radius=20,
-                                 bg_color="yellow")
-        self.frame.pack(padx=20,pady=20)
-        self.btn1=ctk.CTkButton(self.frame,text="hola")
-        self.btn1.place(relx=1,rely=0.3,anchor="center")
-
-
-app = App()
-app.mainloop()
-

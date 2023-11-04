@@ -4,7 +4,7 @@ import asyncio
 import json
 
 # Configura el servidor
-HOST = 'LocalHost'  # Escucha en todas las interfaces
+HOST = '192.168.1.113'  # Escucha en todas las interfaces
 PORT = 12345      # Puerto para la comunicación
 
 # Diccionario para mantener un registro de las conexiones de los ESP32
@@ -15,6 +15,7 @@ def is_json(data):
         json.loads(data)
         return True
     except json.decoder.JSONDecodeError:
+        print("noJson")
         return False
     
 def isNewclient(address):
@@ -41,12 +42,12 @@ def handle_client(client_socket, client_address):
                 # Decodifica los datos JSON
                 if is_json(data.decode('utf-8')):
                     json_data = json.loads(data.decode('utf-8'))
-                    name=json_data["nombre"]
+                    name=json_data["name"]
                     print(f"{name}\n")
                     client_data = {
                     "client": client_address,
                     "Type": json_data["type"],
-                    "Name": json_data["nombre"]
+                    "Name": json_data["name"]
                     }
                     connections_data.append(client_data)
                 else:
@@ -56,7 +57,7 @@ def handle_client(client_socket, client_address):
                 # Procesa los datos según sea necesario
                 
                 # Envía una respuesta al cliente
-                response = "OK"
+                response = "OK\n"
                 client_socket.send(response.encode('utf-8'))
             
             except json.decoder.JSONDecodeError as e:
@@ -64,8 +65,7 @@ def handle_client(client_socket, client_address):
     except ConnectionResetError:
         # Manejar la desconexión inesperada
         print(f"Conexión con {client_address} cerrada inesperadamente: ")
-    finally:
-        client_socket.close()
+
  
         #print(client_data)
     # Cierra la conexión con el cliente
@@ -73,10 +73,17 @@ def handle_client(client_socket, client_address):
     #del connections[client_address]
 def sendData(data):
     print(len(connections))
-    for client in connections.values():
+    for address, socket in connections.items():
+        try:
+            data = "GET SETTINGS\n".encode('utf-8')
+            socket.send(data) 
+        except :
+            # Manejar errores de conexión aquí, por ejemplo, si el cliente se desconecta
+            print(f"Error al enviar datos al socket en {address}")
+    #for client in connections.values():
 
-        json_data = json.dumps(data)
-        client.send(json_data.encode('utf-8'))
+    #    json_data = json.dumps(data)
+    #    client.send(json_data.encode('utf-8'))
 
 def switch_case(option):
     if option == "HOME":

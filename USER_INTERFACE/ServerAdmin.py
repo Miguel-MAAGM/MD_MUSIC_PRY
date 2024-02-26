@@ -55,6 +55,34 @@ class ClientSocket:
  
 def call(data):
     print(data)
+
+
+
+
+
+
+
+import math
+import time
+
+def generar_onda(freq, duracion):
+    tiempo_inicial = time.time()
+
+    while True:
+        tiempo_actual = time.time()
+        tiempo_transcurrido = tiempo_actual - tiempo_inicial
+
+        # Si ha pasado un segundo, emite el valor de la onda senosoidal
+        if tiempo_transcurrido >= 1:
+            # Calcula el valor de la onda senosoidal escalado y desplazado
+
+            tiempo_inicial = time.time()
+
+        # Si ha alcanzado la duración deseada, sale del bucle
+        if tiempo_transcurrido >= duracion:
+            break
+
+# Frecuencia de la onda senosoidal (Hz)
 if __name__ == "__main__":
 
     socketA=ClientSocket("192.168.100.17",12345,receive_callback=call)
@@ -62,37 +90,70 @@ if __name__ == "__main__":
     listaPoint=NOAA_DATA.get_dataNOAA("32401")
     print(listaPoint[0])
     print(listaPoint[0][2])
-    while True:
-        data = input("text somthing :")
-        buf=[]
-        
-        buf = data.split()
-        
-        dataA = {
-            "ID":"TW1",
-            "CMD": "MOV",
-            "M1": 500,
-            "M2": 500,
-            "MV": 500
-        }
+    frecuencia = 1
 
-        dataB = {
-            "ID":"TW2",
-            "CMD": "MOV",
-            "M1": buf[0],
-            "M2": buf[1],
-            "MV": buf[2]
-        }
-        dataC = {
-            "ID":"TW3",
-            "CMD": "MOV",
-            "M1": buf[0],
-            "M2": buf[1],
-            "MV": buf[2]
-        }
+# Duración total de la generación (segundos)
+    duracion_total = 10000
+
+# Llama a la función para generar la onda senosoidal
+    tiempo_inicial = time.time()
+    state=True
+    while True:
+        tiempo_actual = time.time()
+        tiempo_transcurrido = tiempo_actual - tiempo_inicial
+
+        # Si ha pasado un segundo, emite el valor de la onda senosoidal
+        if tiempo_transcurrido >= 10:
+            if state: # Calcula el valor de la onda senosoidal escalado y desplazado
+                dataA = {
+                    "ID":"TW1",
+                    "CMD": "MOV",
+                    "M1": 0,
+                    "M2": 4000,
+                    "MV": 0
+                }
+
+                dataB = {
+                    "ID":"TW2",
+                    "CMD": "MOV",
+                    "M1": -4000,
+                    "M2": 4000,
+                    "MV": 0
+                }
 
     # Combinar dataA y dataB en un JSON más grande
-        combined_data = [dataA, dataB]
-        json_data = json.dumps(combined_data)
-        socketA.send(json_data)
+                combined_data = [dataA, dataB]
+                json_data = json.dumps(combined_data)
+                socketA.send(json_data)
+                state=False
+
+            else:
+                dataA = {
+                    "ID":"TW1",
+                    "CMD": "MOV",
+                    "M1": 0,
+                    "M2": -4000,
+                    "MV": 0
+                }
+
+                dataB = {
+                    "ID":"TW2",
+                    "CMD": "MOV",
+                    "M1": 4000,
+                    "M2": -4000,
+                    "MV": 0
+                }
+
+    # Combinar dataA y dataB en un JSON más grande
+                combined_data = [dataA, dataB]
+                json_data = json.dumps(combined_data)
+                socketA.send(json_data)
+                state=True
+
+            tiempo_inicial = time.time()                
+        # Si ha alcanzado la duración deseada, sale del bucle
+        if tiempo_transcurrido >= duracion_total:
+            break
+
+
     

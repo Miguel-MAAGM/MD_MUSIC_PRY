@@ -49,3 +49,13 @@ class manageClientServer:
         if self.receive_thread:
             self.receive_thread.join()
  
+    def get_listDevice(self):
+        #obtencion de la lista de device
+
+        list_Device=[]
+        return list_Device
+    def get_State(self):
+        #obtencion de estados de device
+
+        return True
+     

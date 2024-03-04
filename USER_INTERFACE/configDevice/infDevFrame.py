@@ -118,19 +118,19 @@ class infDevFrame(ctk.CTkFrame):
 
 
 
-#
-#class App(ctk.CTk):
-#    def __init__(self):
-#       super().__init__()
-#       self.geometry("1080x720")
-#       self.grid_rowconfigure((0,1,2,3,4,5), weight=1)  # configure grid system
-#       self.grid_columnconfigure(0, weight=1)
-#
-#       self.UP_bar= ctk.CTkFrame(master=self,fg_color=("#3a7ebf"),width= 200, height= 50,corner_radius=0)
-#       self.UP_bar.grid(row=0, column=0, padx=0,pady=0,sticky="NEW")
-#       self.my_frame = infDevFrame(master=self)
-#       self.my_frame.grid(row=1,rowspan=5, column=0, padx=20,pady=20 ,sticky="NSEW")
-#
-#if __name__ == "__main__":
-#    app = App()
-#    app.mainloop()#
+
+class App(ctk.CTk):
+    def __init__(self):
+       super().__init__()
+       self.geometry("1080x720")
+       self.grid_rowconfigure((0,1,2,3,4,5), weight=1)  # configure grid system
+       self.grid_columnconfigure(0, weight=1)
+
+       self.UP_bar= ctk.CTkFrame(master=self,fg_color=("#3a7ebf"),width= 200, height= 50,corner_radius=0)
+       self.UP_bar.grid(row=0, column=0, padx=0,pady=0,sticky="NEW")
+       self.my_frame = infDevFrame(master=self)
+       self.my_frame.grid(row=1,rowspan=5, column=0, padx=20,pady=20 ,sticky="NSEW")
+
+if __name__ == "__main__":
+    app = App()
+    app.mainloop()#

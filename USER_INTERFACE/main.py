@@ -1,14 +1,12 @@
 
 import signal
 import sys
-import ServerAdmin as srvAd
-import SideBar as SdB
+#import utils.SideBar as SdB
 import numpy as np
 import customtkinter as ctk
 import AudioinFrame as AdI
 import infDevFrame as iDF
 import inAudioDevDect as Audio
-import librosa
 import ServerAdmin
 import struct
 # Dirección IP y puerto en localhost
@@ -17,8 +15,6 @@ def signal_handler(sig, frame):
     print("Se ha recibido la señal SIGINT (Ctrl+C). Realizando tareas de cierre...")
     sys.exit(0)
 ctk.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"
-
-
 
 
 class App(ctk.CTk):
@@ -45,6 +41,8 @@ class App(ctk.CTk):
         self.ConfigFrame.list_dev(["VALOR1","VALOR2","VALOR3",])
         self.count=0
         self.frame=[]
+        self.canvas=ctk.CTkCanvas(self)
+
     def segmented_button_callback(self,value):
         print("segmented button clicked:", value)   
         if value== "PLAY":
@@ -70,12 +68,9 @@ class App(ctk.CTk):
             audio_data = np.concatenate(self.frame)
             audio_data = audio_data.astype(float)
             #tempo, beats = librosa.beat.beat_track(y=audio_data.astype(float), sr=self.AudioManagerFile.get_rate())
-            audio_data_fast = librosa.effects.time_stretch(audio_data, rate=2)
             # Estima el tempo del audio acelerado
-            tempo_fast, _ = librosa.beat.beat_track(y=audio_data_fast, sr=self.AudioManagerFile.get_rate())
             self.count=0
             self.frame=[]
-            print(tempo_fast)
     def finish_Song(self):
         self.count=0
         self.frame=[]

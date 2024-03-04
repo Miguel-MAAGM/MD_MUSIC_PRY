@@ -2,7 +2,7 @@ from typing import Optional, Tuple, Union
 import numpy as np
 import customtkinter as ctk
 import pyaudio
-import os
+
 
 
 class subFrameMic((ctk.CTkFrame)):
@@ -49,8 +49,7 @@ class subFrameFile((ctk.CTkFrame)):
         print(ruta.name)
         self.ruta=ruta.name
         self.entry_FileEx.delete(0,400)
-        file = os.path.basename(ruta.name)
-        self.entry_FileEx.insert(0,file)
+        self.entry_FileEx.insert(0,ruta.name)
 
 
 class PlayFrame(ctk.CTkFrame):
@@ -71,18 +70,3 @@ class PlayFrame(ctk.CTkFrame):
         self.subFrameFile.pack(padx=20,pady=20,fill="both",expand=True)
     def get_Path(self):
         return self.subFrameFile.ruta
-
-class App(ctk.CTk):
-    def __init__(self):
-        super().__init__()
-        self.geometry("1080x720")
-        self.grid_rowconfigure((0), weight=1)  # configure grid system
-        self.grid_columnconfigure(0, weight=1)
-        self.PlayFra=PlayFrame(self,fg_color=("gray30"))
-    
-        self.PlayFra.grid(row=0, column=0, padx=20, pady=20,sticky="nswe")#
-
-if __name__ == "__main__":
-    app = App()
-    app.mainloop()
-##

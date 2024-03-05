@@ -1,11 +1,10 @@
-
 import signal
 import sys
 #import utils.SideBar as SdB
 import numpy as np
 import customtkinter as ctk
 import AudioinFrame as AdI
-import infDevFrame as iDF
+#import infDevFrame as iDF
 import inAudioDevDect as Audio
 import ServerAdmin
 import struct
@@ -37,8 +36,8 @@ class App(ctk.CTk):
         self.AudioFrame= AdI.PlayFrame(self,clb_PLAY=self.PLAY)
         self.AudioFrame.grid(row=1,column=0,sticky ="NSWE") 
 
-        self.ConfigFrame= iDF.infDevFrame(self)
-        self.ConfigFrame.list_dev(["VALOR1","VALOR2","VALOR3",])
+        #self.ConfigFrame= iDF.infDevFrame(self)
+       # self.ConfigFrame.list_dev(["VALOR1","VALOR2","VALOR3",])
         self.count=0
         self.frame=[]
         self.canvas=ctk.CTkCanvas(self)
@@ -47,13 +46,13 @@ class App(ctk.CTk):
         print("segmented button clicked:", value)   
         if value== "PLAY":
             self.AudioFrame.grid(row=1,column=0,sticky ="NSWE") 
-            self.ConfigFrame.grid_forget()
+       #     self.ConfigFrame.grid_forget()
 
             print("PLAY")
 
         else:
             self.AudioFrame.grid_forget()
-            self.ConfigFrame.grid(row=1,column=0,sticky ="NSWE") 
+       #     self.ConfigFrame.grid(row=1,column=0,sticky ="NSWE") 
 
             print("OTHER")
     

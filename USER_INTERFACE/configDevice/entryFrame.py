@@ -1,4 +1,3 @@
-#entryFrame.py
 import customtkinter as ctk
 
 class entryFrame(ctk.CTkFrame):

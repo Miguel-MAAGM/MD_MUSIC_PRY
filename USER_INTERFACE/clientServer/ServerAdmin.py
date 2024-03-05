@@ -1,7 +1,7 @@
 import socket
 import threading
 import json 
-import NOAA_DATA
+import USER_INTERFACE.audioFrame.NOAA_DATA as NOAA_DATA
 # Dirección IP y puerto en localhost
 host = 'localhost'
 port = 12345  # Reemplaza con el puerto que desees utilizar

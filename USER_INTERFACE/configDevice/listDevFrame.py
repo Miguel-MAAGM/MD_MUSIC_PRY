@@ -21,6 +21,9 @@ class listDevFrame(ctk.CTkFrame):
         self.Btn_Refresh.grid(row=2, column=0,padx=10,pady=10)
         self.Btn_GET.grid(row=3, column=0,padx=10,pady=10)
         self.Btn_SET.grid(row=4, column=0,padx=10,pady=10)
+        
     def refreshListDev(self,list):
-
         self.cmb_boxListDev.configure(values=list)
+    
+    def getSelectDevice(self):
+        return self.cmb_boxListDev.get()

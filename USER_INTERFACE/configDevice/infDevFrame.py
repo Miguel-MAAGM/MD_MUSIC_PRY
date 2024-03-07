@@ -2,6 +2,7 @@
 import numpy as np
 from . import listDevFrame as LsDev
 from . import configDevFrame as cfd
+from . import logFrame as lf
 import customtkinter as ctk
 
 
@@ -26,42 +27,41 @@ class infDevFrame(ctk.CTkFrame):
         self.callBack_Refresh=clb_master_Refresh #GET List Device
         self.callBack_SendPipeline=clb_master_SendPipeline #Send mesage plain to Device Select
 
-        
-        # add widgets onto the frame...
-
-        self.text_InfoDevText=ctk.CTkTextbox(self) 
-        self.entry_infoDevText=ctk.CTkEntry(self,placeholder_text="Command to tower")
-        self.BTNentry_infoDev=ctk.CTkButton(self,text="Send",command=self.sendingEvent) 
-        self.cofingDevFrame = cfd.cofingDevFrame(self)
+        self.LogFrame= lf.logFrame(self,Clb_SendEvent=self.sendingEvent) #action send
+                                                                         #Recive
+        self.cofingDevFrame = cfd.cofingDevFrame(self) # set and get function
         self.listDevFrame =LsDev.listDevFrame(self,
                                               clb_SET=self.M_clb_SET, #action from set button
                                               clb_GET=self.M_clb_GET, #action from GET button
                                               clb_RFH=self.M_clb_RFH) #action from RFH button
-        ##self.count=0
-        self.listDevFrame.grid(row=0, column=2,padx=20,pady=20,sticky="nsew")
-        self.cofingDevFrame.grid(row=0, column=0,padx=20,pady=20,columnspan=2,sticky="nsew")
-        self.text_InfoDevText.grid(row=1, padx=20, columnspan=3,sticky="nsew")
-        self.entry_infoDevText.grid(row=2,column=0,padx=20,columnspan=2,sticky="ew")
-        self.BTNentry_infoDev.grid(row=2,column=2,padx=20,sticky="ew")
 
-        #self.text_InfoDevText.insert("0.0","-> |"+"Console Log with server..."+"\n")
-        #self.text_InfoDevText.configure(state="disabled")  
+        self.listDevFrame.grid(row=0, column=2,padx=10,pady=10,sticky="nsew")
+        self.cofingDevFrame.grid(row=0, column=0,padx=10,pady=10,columnspan=2,sticky="nsew")
+        self.LogFrame.grid(row=1,column=0,padx=10,pady=10,rowspan=2,columnspan=3,sticky="nsew")
 
-    def sendingEvent(self):
-        self.text_InfoDevText.configure(state="normal")
-        self.text_InfoDevText.insert("0.0",f"<- {self.count} |"+"Console Log with server... event ->"+self.entry_infoDevText.get()+"\n")
-        self.count=self.count+1
-        self.text_InfoDevText.configure(state="disabled")
-        self.callBack_Set(self.entry_infoDevText.get())
-        self.entry_infoDevText.delete(0,100)
-        self.getingEvent()
-
-
-
-
-    def getingEvent(self):
-        print("New Data")
+    
     def M_clb_GET(self):
+
+        self.callBack_Get(self.listDevFrame.getSelectDevice())
+        print("GET_INFO")
+    def M_clb_SET(self):
+        self.callBack_Set(self.cofingDevFrame.getValues())
+        print("SET_INFO")
+
+    def M_clb_RFH(self):
+        self.callBack_Refresh()
+        print("SET_REFRESH")
+    
+    def setListDev(self,messege):
+        self.listDevFrame.refreshListDev(messege)
+
+    def sendingEvent(self,messege):
+        self.callBack_SendPipeline(messege )
+        return True
+
+    
+
+
 #        MTW_1 = {
 #            'Speed'  : 1600,
 #            'AccPSec': 800,
@@ -94,17 +94,5 @@ class infDevFrame(ctk.CTkFrame):
 #            'M_VIELA': M_VIELA
 #        }
 #        self.cofingDevFrame.setValues(torres)
-        print("GET_INFO")
-    def M_clb_SET(Self):
-        print("SET_INFO")
-    def M_clb_RFH(Self):
-        print("SET_REFRESH")
-    def list_dev(self,list):
-        self.listDevFrame.refreshListDev(list)
-
-
-
-
-
 
 

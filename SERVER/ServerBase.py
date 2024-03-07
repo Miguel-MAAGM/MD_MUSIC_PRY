@@ -4,7 +4,7 @@ import asyncio
 import json
 
 # Configura el servidor
-HOST = '192.168.100.17'  # Escucha en todas las interfaces
+HOST = 'localhost'  # Escucha en todas las interfaces
 PORT = 12345      # Puerto para la comunicación
 
 # Diccionario para mantener un registro de las conexiones de los ESP32
@@ -181,7 +181,9 @@ def read_console_input():
             # Se captura el EOFError y se maneja adecuadamente   
             print("Entrada de usuario finalizada.")
             
-def main():
+
+
+if __name__ == "__main__":
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((HOST, PORT))
@@ -201,8 +203,3 @@ def main():
         client_handler = threading.Thread(target=handle_client, args=(client_socket, client_address))
         client_handler.start()
         
-
-if __name__ == "__main__":
-
-    main()
-    

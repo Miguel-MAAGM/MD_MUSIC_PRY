@@ -24,12 +24,32 @@ class App(ctk.CTk):
         #self.AudioFrame= AdI.PlayFrame(self,clb_PLAY=self.PLAY)
         #self.AudioFrame.grid(row=1,column=0,sticky ="NSWE") 
 
-        self.ConfigFrame= infDev.infDevFrame(self)
+        self.ConfigFrame= infDev.infDevFrame(self,
+                                             clb_master_SET=self.setConfig,
+                                             clb_master_GET=self.getConfig,
+                                             clb_master_Refresh=self.refreshListDev,
+                                             clb_master_SendPipeline=self.sendMessegePipe)
         self.ConfigFrame.grid(row=1,column=0,sticky ="NSWE") 
        # self.ConfigFrame.list_dev(["VALOR1","VALOR2","VALOR3",])
         #self.count=0
         #self.frame=[]
         #self.canvas=ctk.CTkCanvas(self)
+    def refreshListDev(self):
+        self.ConfigFrame.setListDev(["DEV1","DEV2","DEV3","DEV4"])
+        return True
+    def setConfig(self,messege): #manda json 
+        print(messege)
+        return True
+    def getConfig(self,messege):# recibe json
+        print(messege)
+        
+        return True
+    def sendMessegePipe(self, messege):#texto plano
+        
+        print(messege)
+        return True
+
+
 
     def segmented_button_callback(self,value):
         print("segmented button clicked:", value)   

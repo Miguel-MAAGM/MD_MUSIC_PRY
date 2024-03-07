@@ -19,7 +19,6 @@ class cofingDevFrame(ctk.CTkFrame):
         self.Entry_VIE= infDev.entryFrame(self.tabview.tab("Viela"))
         self.Entry_VIE.pack(padx=10,pady=10,fill="both",expand=True)
     def setValues(self,struct):
-        
         self.Entry_TW1.setValues(struct['MTW_1'])
         self.Entry_TW2.setValues(struct['MTW_2'])
         self.Entry_VIE.setValues(struct['M_VIELA'])

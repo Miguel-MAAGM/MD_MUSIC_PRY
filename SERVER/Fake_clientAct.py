@@ -6,7 +6,7 @@ port = 12345  # Reemplaza con el puerto que desees utilizar
 
 inputdata= input("NAME FAKE:")
 data = {
-    "nombre": inputdata,
+    "name": inputdata,
     "type" : "act"
 }
 json_data = json.dumps(data)  # Convierte el diccionario en una cadena JSON

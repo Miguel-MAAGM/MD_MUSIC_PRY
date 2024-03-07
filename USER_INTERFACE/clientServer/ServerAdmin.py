@@ -53,8 +53,6 @@ class ClientSocket:
         if self.receive_thread:
             self.receive_thread.join()
  
-def call(data):
-    print(data)
 
 
 

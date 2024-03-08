@@ -43,6 +43,9 @@ class ClientSocket:
                     break
                 response_data = response.decode('utf-8')
                 if self.receive_callback:
+                    
+        
+        
                     self.receive_callback(response_data)
             except ConnectionResetError:
                 break
@@ -52,8 +55,18 @@ class ClientSocket:
         self.socket.close()
         if self.receive_thread:
             self.receive_thread.join()
- 
+    def getInfoDev(self,messege):
 
+        return 
+    def getInfoDev(self,messege):
+
+        return
+    def getListDev(self,messege):
+
+        return 
+    def sendPoint(self,messege):
+        
+        return
 
 
 

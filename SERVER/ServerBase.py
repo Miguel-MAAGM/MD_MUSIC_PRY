@@ -56,8 +56,9 @@ def handle_client(client_socket, client_address):
                     # Procesa los datos según sea necesario
                     
                     # Envía una respuesta al cliente
-                    response = "OK\n"
-                    client_socket.send(response.encode('utf-8'))
+                    response ={"type":"OK"} 
+                    json_data = json.dumps(response)
+                    client_socket.send(json_data.encode('utf-8'))
                 else:
                     if is_json(data.decode('utf-8')):
                         if is_json(data.decode('utf-8')):
@@ -89,8 +90,9 @@ def handle_client(client_socket, client_address):
                     # Procesa los datos según sea necesario
                     
                     # Envía una respuesta al cliente
-                    response = "OK\n"
-                    client_socket.send(response.encode('utf-8'))
+                    response ={"type":"OK"} 
+                    json_data = json.dumps(response)
+                    client_socket.send(json_data.encode('utf-8'))
 
             except json.decoder.JSONDecodeError as e:
                 print(f"Error al analizar JSON: {e}")

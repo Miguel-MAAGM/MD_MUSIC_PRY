@@ -3,7 +3,7 @@ import numpy as np
 import customtkinter as ctk
 import struct
 from configDevice import infDevFrame as infDev
-
+from clientServer import manageClientServer as MCS
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -20,6 +20,11 @@ class App(ctk.CTk):
                                                      unselected_color="#3a7ebf")
         segemented_button.pack(pady=20)
         segemented_button.set("PlAY")  # set initial value
+
+
+
+        self.protocol("WM_DELETE_WINDOW",self.CloseALL)
+
         #self.AudioManagerFile=Audio.AudioManagerFile(callback_data=self.Clb_Audio,callback_finish=self.finish_Song)
         #self.AudioFrame= AdI.PlayFrame(self,clb_PLAY=self.PLAY)
         #self.AudioFrame.grid(row=1,column=0,sticky ="NSWE") 
@@ -30,10 +35,13 @@ class App(ctk.CTk):
                                              clb_master_Refresh=self.refreshListDev,
                                              clb_master_SendPipeline=self.sendMessegePipe)
         self.ConfigFrame.grid(row=1,column=0,sticky ="NSWE") 
-       # self.ConfigFrame.list_dev(["VALOR1","VALOR2","VALOR3",])
-        #self.count=0
-        #self.frame=[]
-        #self.canvas=ctk.CTkCanvas(self)
+
+        self.talkToServer= MCS.manageClientServer(host="Localhost",port=12345,
+                                                  clb_GetInf=None,
+                                                  clb_List=None,
+                                                  clb_pipeline=None)
+        self.talkToServer.connect()
+      
     def refreshListDev(self):
         self.ConfigFrame.setListDev(["DEV1","DEV2","DEV3","DEV4"])
         return True
@@ -49,6 +57,10 @@ class App(ctk.CTk):
         print(messege)
         return True
 
+    def CloseALL(self):
+        print("Cerrando")
+        self.destroy()
+        self.talkToServer.disconnect()
 
 
     def segmented_button_callback(self,value):

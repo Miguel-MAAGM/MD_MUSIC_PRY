@@ -4,6 +4,7 @@ import customtkinter as ctk
 import struct
 from configDevice import infDevFrame as infDev
 from clientServer import manageClientServer as MCS
+from audioFrame import AudioinFrame as AiF
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -25,9 +26,8 @@ class App(ctk.CTk):
 
         self.protocol("WM_DELETE_WINDOW",self.CloseALL)
 
-        #self.AudioManagerFile=Audio.AudioManagerFile(callback_data=self.Clb_Audio,callback_finish=self.finish_Song)
-        #self.AudioFrame= AdI.PlayFrame(self,clb_PLAY=self.PLAY)
-        #self.AudioFrame.grid(row=1,column=0,sticky ="NSWE") 
+        self.AudioFrame= AiF.PlayFrame(self)
+        self.AudioFrame.grid(row=1,column=0,sticky ="NSWE") 
 
         self.ConfigFrame= infDev.infDevFrame(self,
                                              clb_master_SET=self.setConfig,
@@ -66,14 +66,13 @@ class App(ctk.CTk):
     def segmented_button_callback(self,value):
         print("segmented button clicked:", value)   
         if value== "PLAY":
-           # self.AudioFrame.grid(row=1,column=0,sticky ="NSWE") 
-       #     self.ConfigFrame.grid_forget()
-
+            self.AudioFrame.grid(row=1,column=0,sticky ="NSWE") 
+            self.ConfigFrame.grid_forget()
             print("PLAY")
 
         elif value =="CONFIG":
-           # self.AudioFrame.grid_forget()
-       #     self.ConfigFrame.grid(row=1,column=0,sticky ="NSWE") 
+            self.AudioFrame.grid_forget()
+            self.ConfigFrame.grid(row=1,column=0,sticky ="NSWE") 
 
             print("OTHER")
     

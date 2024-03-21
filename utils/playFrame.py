@@ -1,4 +1,3 @@
-from typing import Optional, Tuple, Union
 import numpy as np
 import customtkinter as ctk
 import pyaudio

@@ -3,7 +3,6 @@ import wave
 import time as tm
 import threading
 import numpy as np
-import sounddevice as sd
 import time
 class AudioManagerFile():
     def __init__(self,audio_file="",callback_data=None,callback_finish=None):

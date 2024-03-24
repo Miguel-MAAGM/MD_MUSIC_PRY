@@ -4,7 +4,6 @@ import asyncio
 import json
 
 # Configura el servidor
-HOST = 'localhost'  # Escucha en todas las interfaces
 PORT = 12345      # Puerto para la comunicación
 
 # Diccionario para mantener un registro de las conexiones de los ESP32
@@ -56,8 +55,7 @@ def handle_client(client_socket, client_address):
                     # Procesa los datos según sea necesario
                     
                     # Envía una respuesta al cliente
-                    response ={"type":"OK"} 
-                    json_data = json.dumps(response)
+                    json_data = "OK\n"
                     client_socket.send(json_data.encode('utf-8'))
                 else:
                     if is_json(data.decode('utf-8')):
@@ -90,8 +88,7 @@ def handle_client(client_socket, client_address):
                     # Procesa los datos según sea necesario
                     
                     # Envía una respuesta al cliente
-                    response ={"type":"OK"} 
-                    json_data = json.dumps(response)
+                    json_data =  "OK\n"
                     client_socket.send(json_data.encode('utf-8'))
 
             except json.decoder.JSONDecodeError as e:
@@ -186,7 +183,8 @@ def read_console_input():
 
 
 if __name__ == "__main__":
-
+    DOMAIN_NAME = 'tudominio.com'  # Reemplaza 'tudominio.com' con tu nombre de dominio
+    HOST = socket.gethostbyname(DOMAIN_NAME)
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((HOST, PORT))
     server.listen(5)

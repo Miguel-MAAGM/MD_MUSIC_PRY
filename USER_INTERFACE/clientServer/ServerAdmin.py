@@ -97,7 +97,7 @@ if __name__ == "__main__":
 
     socketA=ClientSocket("192.168.100.17",12345)
     socketA.connect()
-    listaPoint=NOAA_DATA.get_dataNOAA("32401")
+    listaPoint=[]
     print(listaPoint[0])
     print(listaPoint[0][2])
     frecuencia = 1

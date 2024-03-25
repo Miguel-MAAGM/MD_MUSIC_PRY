@@ -44,7 +44,7 @@ class canvasMat(ctk.CTkFrame):
         normalized_fft_frame = abs_fft_frame / np.max(abs_fft_frame)
         self.promedios_partes =normalized_fft_frame[:len(frame)//5] 
         
-        
+        return  self.promedios_partes
         # Divide el frame en cuatro partes
         ##longitud_parte = len(normalized_fft_frame) // pilar
         ##partes = [normalized_fft_frame[i:i+longitud_parte] for i in range(0, len(normalized_fft_frame), longitud_parte)]

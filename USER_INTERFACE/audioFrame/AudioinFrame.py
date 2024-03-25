@@ -60,33 +60,37 @@ class subFrameFile((ctk.CTkFrame)):
 class btPlayFrame(ctk.CTkFrame):
     def __init__(self,master,clb_PLAY=None,
                              clb_STOP=None,
-                             clb_PAUSE=None,**kwargs):
+                             clb_PAUSE=None,
+                             combobox_callback=None,**kwargs):
         super().__init__(master, **kwargs)
-        self.grid_rowconfigure((0,1,2), weight=1)  # configure grid system
+        self.grid_rowconfigure((0,1,2,3), weight=1)  # configure grid system
         self.grid_columnconfigure((0), weight=1)
         self.btn_Play=ctk.CTkButton(self, text="PLAY",command=clb_PLAY)
         self.btn_Stop=ctk.CTkButton(self, text="STOP",command=clb_STOP)
         self.btn_Pause=ctk.CTkButton(self, text="PAUSE",command=clb_PAUSE)
+        self.cm_Box= ctk.CTkComboBox(self,values=["triangular", "rectangular","senoidal"],
+                                     command=combobox_callback)
+        self.cm_Box.set("triangular")
         self.btn_Play  .grid(row=0, column=0,padx=20,pady=20,sticky="we")
         self.btn_Stop  .grid(row=1, column=0,padx=20,pady=20,sticky="we")
         self.btn_Pause .grid(row=2, column=0,padx=20,pady=20,sticky="we")
-       
+        self.cm_Box    .grid(row=3, column=0,padx=20,pady=20,sticky="we")
         
         
 
 
 class PlayFrame(ctk.CTkFrame):
-    def __init__(self,master,clb_PLAY=None,**kwargs):
+    def __init__(self,master,clb_PLAY=None,clb_DATAOUT=None,**kwargs):
         super().__init__(master, **kwargs)
         self.grid_rowconfigure((0,1), weight=1)  # configure grid system
         
         self.grid_columnconfigure((0), weight=100)
         self.grid_columnconfigure((1), weight=40)
-
+        self.clb_DAtaOut=clb_DATAOUT
         self.tabview=ctk.CTkTabview(self)
         self.FFTWindow=fftF.canvasMat(self)
         self.WaveFunction=wFrame.waveFrame(self)
-        self.panel= btPlayFrame(self,self.actionPlay,self.actionStop,self.actionPuse)
+        self.panel= btPlayFrame(self,self.actionPlay,self.actionStop,self.actionPuse,combobox_callback=self.clb_cmBox)
         self.Wav=auDev.AudioManagerFile("",self.clb_wav_play,self.clb_wav_finish)
         self.Mic=auDev.AudioManagerMic(self.clb_mic_play)
         
@@ -108,15 +112,21 @@ class PlayFrame(ctk.CTkFrame):
         self.size=0
         self.ofset=0
         self.redermi_hilo =threading.Thread(target=self.WaveFunction.render)
+        self.waveType="triangular"
+    def clb_cmBox(self,choice):
+        print(choice)
+        self.waveType=choice
     def clb_wav_play(self,data):
         self.buffer.extend(data)
         self.size+=len(data)
-        if((self.size>1024*4)):
-            self.FFTWindow.compute(self.buffer,4)
+        if((self.size>1024*10)):
+            fft_out=self.FFTWindow.compute(self.buffer,4)
             self.FFTWindow.animation()
             self.WaveFunction.clear()
-            self.WaveFunction.visualizar_onda("triangular")
+            self.WaveFunction.visualizar_onda(self.waveType)
             x_intersecciones, y_intersecciones=self.WaveFunction.visualizar_recta(4,0.005,self.ofset)
+            valor_medio = np.mean(fft_out[::500])*10
+            self.clb_DAtaOut([y_intersecciones, valor_medio])
             #print(str(x_intersecciones)+" "+str(y_intersecciones))
             self.ofset+=0.0001
             if self.ofset>(0.1-(0.005*3)):
@@ -134,13 +144,15 @@ class PlayFrame(ctk.CTkFrame):
     def clb_mic_play(self,data,chunk):
         self.buffer.extend(data)
         self.size+=len(data)
-        if((self.size>1024*4)):
+        if((self.size>1024*10)):
             print(str(len(data))+"--------")
             self.FFTWindow.compute(self.buffer,4)
             self.FFTWindow.animation()
             self.WaveFunction.clear()
-            self.WaveFunction.visualizar_onda("triangular")
+            self.WaveFunction.visualizar_onda(self.waveType)
             x_intersecciones, y_intersecciones=self.WaveFunction.visualizar_recta(4,0.005,self.ofset)
+            cordenada=[x_intersecciones, y_intersecciones]
+            self.clb_DAtaOut(cordenada)
             #print(str(x_intersecciones)+" "+str(y_intersecciones))
             self.ofset+=0.001
             if self.ofset>(0.1-(0.005*3)):
@@ -173,7 +185,6 @@ class PlayFrame(ctk.CTkFrame):
     def actionStop(self):
         self.tabview._segmented_button.configure(state=ctk.NORMAL)
         if(not self.Wav.is_finish):
-            print("aa")
             self.Wav.stream.stop_stream()
             self.Wav.stream.close() 
         self.Mic.stop()   

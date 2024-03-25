@@ -45,11 +45,13 @@ class manageClientServer:
                 if(self.is_json(response.decode('utf-8'))):
                     response_data = json.loads(response.decode('utf-8'))
                     print("Paquete recibido como JSON:", response_data)
-                    self.switch_case(self.type.pop(0),response_data)
+                    if not len(self.type)==0:
+                        self.switch_case(self.type.pop(0),response_data)
             except ConnectionAbortedError:
                 print("La conexión fue anulada por el software en el equipo host.")
                 break
             except Exception as e:
+                print(self.type)
                 print(f"Error al recibir datos: {e}")
                 break
 
@@ -58,9 +60,6 @@ class manageClientServer:
         self.socket.close()
         if self.receive_thread:
             self.receive_thread.join()
- 
-
-
     def is_json(self,data):
         try:
             json.loads(data)
@@ -113,6 +112,7 @@ class manageClientServer:
            self.response_List(messege)
         if (Type=="GET_Data"):
            self.response_GetData(messege)
+
 def calb(data):
     print(data)
 def calb_m(data):

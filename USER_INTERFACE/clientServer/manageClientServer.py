@@ -108,3 +108,9 @@ class manageClientServer:
             
         }
         return switch_dict.get(Type, self.case_default)()
+
+
+if __name__ == "__main__":
+
+
+    manageClientServer(socket.gethostbyaddr,PORT,)

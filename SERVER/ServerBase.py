@@ -3,11 +3,8 @@ import threading
 import asyncio
 import json
 
-# Configura el servidor
-HOST = 'localhost'  # Escucha en todas las interfaces
 PORT = 12345      # Puerto para la comunicación
 
-# Diccionario para mantener un registro de las conexiones de los ESP32
 connections = {}
 connections_data=[]
 def is_json(data):
@@ -104,27 +101,18 @@ def handle_client(client_socket, client_address):
         print(f"Conexión con {client_address} cerrada inesperadamente: ")
 
  
-        #print(client_data)
-    # Cierra la conexión con el cliente
-    #client_socket.close()
-    #del connections[client_address]
 def sendData(data,socket):
     print(len(connections))
     try:
         forSend = data+"\n"
         socket.send(forSend.encode('utf-8')) 
     except :
-        # Manejar errores de conexión aquí, por ejemplo, si el cliente se desconecta
         print(f"Error al enviar datos al socket en {socket}")
-    #for client in connections.values():
 
-    #    json_data = json.dumps(data)
-    #    client.send(json_data.encode('utf-8'))
 
 def switch_case(option):
     rama=[]
     rama=option.split()
-    print(rama)
     if rama[0] == "HOME":
 
 
@@ -163,16 +151,18 @@ def switch_case(option):
 
         return "Opción 3 seleccionada"
     elif rama[0] == "SET":
+
         sendData("SET INFO")
         return "Opción 3 seleccionada"
     elif rama[0]=="LIST":
+        
         print(connections_data)
     else:
+        
         return "Opción no válida"
 
 def read_console_input():
     while True:
-        # Envía el mensaje a todos los clientes conectados
         try:
             input_data = input("Ingrese un comando (HOME,LIST ,MOV, SET VEL, SET ACC): ").strip()
             print(input_data)
@@ -180,28 +170,35 @@ def read_console_input():
                 break
             print(switch_case(input_data))
         except EOFError:
-            # Se captura el EOFError y se maneja adecuadamente   
             print("Entrada de usuario finalizada.")
+            server.close()
+
+            break
+            
             
 
 
 if __name__ == "__main__":
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind((HOST, PORT))
-    server.listen(5)
-    print(f"Servidor escuchando en {HOST}:{PORT}")
+    host =socket.gethostbyname(socket.gethostname())
+    
+    server.bind((host, PORT))
+    server.listen(10)
+    print(f"Servidor escuchando en {host}:{PORT}")
     console_input_thread = threading.Thread(target=read_console_input)
     console_input_thread.start()
+    try:
+        while True:
+            client_socket, client_address = server.accept()
 
-    while True:
-        client_socket, client_address = server.accept()
-        
-        #print(f"Conexión entrante desde {client_address}")
-        
-        connections[client_address] = client_socket
-        
-        # Inicia un hilo para manejar la conexión con el cliente
-        client_handler = threading.Thread(target=handle_client, args=(client_socket, client_address))
-        client_handler.start()
-        
+            #print(f"Conexión entrante desde {client_address}")
+
+            connections[client_address] = client_socket
+
+            # Inicia un hilo para manejar la conexión con el cliente
+            client_handler = threading.Thread(target=handle_client, args=(client_socket, client_address))
+            client_handler.start()
+    except KeyboardInterrupt:
+        server.close()
+        print("APP close")

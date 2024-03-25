@@ -36,7 +36,7 @@ class App(ctk.CTk):
                                              clb_master_SendPipeline=self.sendMessegePipe)
         self.ConfigFrame.grid(row=1,column=0,sticky ="NSWE") 
 
-        self.talkToServer= MCS.manageClientServer(host="Localhost",port=12345,
+        self.talkToServer= MCS.manageClientServer(host="192.168.212.17",port=12345,
                                                   clb_GetInf=None,
                                                   clb_List=None,
                                                   clb_pipeline=None)

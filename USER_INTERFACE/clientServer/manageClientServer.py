@@ -1,6 +1,7 @@
 import socket
 import threading
 import json 
+import time
 PORT = 12345      # Puerto para la comunicación
 
 class manageClientServer:
@@ -15,6 +16,7 @@ class manageClientServer:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connected = False
         self.receive_thread = None
+        self.type=[]
 
     def connect(self):
         try:
@@ -40,17 +42,10 @@ class manageClientServer:
             try:
                 response = self.socket.recv(1024)
                 print(response)
-                if not response:
-                    break
-                response_data = json.loads(response.decode('utf-8'))
-                print("Paquete recibido como JSON:", response_data)
-                if 'type' in response_data:
-                    tipo = response_data['type']
-                    if tipo == "OK":
-                        print("Conexcion Creada :D")
-                    else:
-                        otros_datos = response_data['datos']
-                        self.switch_case(tipo,otros_datos)
+                if(self.is_json(response.decode('utf-8'))):
+                    response_data = json.loads(response.decode('utf-8'))
+                    print("Paquete recibido como JSON:", response_data)
+                    self.switch_case(self.type.pop(0),response_data)
             except ConnectionAbortedError:
                 print("La conexión fue anulada por el software en el equipo host.")
                 break
@@ -64,20 +59,36 @@ class manageClientServer:
         if self.receive_thread:
             self.receive_thread.join()
  
-    def get_listDevice(self):
-        #obtencion de la lista de device
-        return True
 
 
+    def is_json(self,data):
+        try:
+            json.loads(data)
+            return True
+        except ValueError:
+            return False
+    
     def getInfoDev(self,messege):
-
+        data= {
+            "CMD":"GET",
+            "ID":messege
+        }
+        json_data = json.dumps(data)
+        self.send(json_data)
+        self.type.append("GET_Data")
         return 
     def setInfoDev(self,messege):
-
+        json_data = json.dumps(messege)
+        self.send(json_data)
         return
-    def getListDev(self,messege):
-
-        return 
+    def getListDev(self):
+        data= {
+            "CMD":"LIST"
+        }
+        json_data = json.dumps(data)
+        self.send(json_data)
+        self.type.append("LIST")
+         
     def sendPoint(self,messege):
         
         return
@@ -89,28 +100,70 @@ class manageClientServer:
     def response_List(self,messege):
         if self.clb_List:
             self.clb_List(messege)
-        return True
     def response_Pipeline(self,messege):
         if self.clb_Pipeline:
             self.clb_Pipeline(messege)
-        return True
     def response_GetData(self,messege):
         if self.clb_GetInf:
             self.clb_GetInf(messege)
-        return True
          
    
     def switch_case(self,Type, messege):
-        switch_dict = {
-            "LIST": self.response_List(messege),
-            "PIPELINE":self.response_Pipeline(messege),
-            "GETDATA":self.response_GetData(messege),
-            
-        }
-        return switch_dict.get(Type, self.case_default)()
-
-
+        if (Type=="LIST"):
+           self.response_List(messege)
+        if (Type=="GET_Data"):
+           self.response_GetData(messege)
+def calb(data):
+    print(data)
+def calb_m(data):
+    print(data)
+def calb_pi(data):
+    print(data)
 if __name__ == "__main__":
 
 
-    manageClientServer(socket.gethostbyaddr,PORT,)
+    server =manageClientServer(socket.gethostbyname(socket.gethostname()),PORT,clb_List=calb,clb_GetInf=calb_m,clb_pipeline=calb_pi)
+
+    server.connect()
+    time.sleep(5)
+
+    dataA = {
+            "ID":"TW1",
+            "CMD": "MOV",
+            "M1": 0,
+            "M2": 4000,
+            "MV": 0
+        }
+    dataB = {
+            "ID":"TW2",
+            "CMD": "MOV",
+            "M1": -4000,
+            "M2": 4000,
+            "MV": 0
+        }
+    dataC = {
+            "ID":"TW3",
+            "CMD": "MOV",
+            "M1": -4000,
+            "M2": 4000,
+            "MV": 0
+        }
+    dataD = {
+            "ID":"TW4",
+            "CMD": "MOV",
+            "M1": -4000,
+            "M2": 4000,
+            "MV": 0
+        }
+    data_master={
+        "CMD":"MOV",
+        "TW1":dataA,
+        "TW2":dataB,
+        "TW3":dataC,
+        "TW4":dataD
+    }
+    json_data = json.dumps(data_master)
+    print(json_data)
+    server.send(json_data)
+
+    #server.getListDev()

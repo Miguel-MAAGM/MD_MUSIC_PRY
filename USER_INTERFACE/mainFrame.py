@@ -24,7 +24,11 @@ class App(ctk.CTk):
                                                      unselected_color="#3a7ebf")
         segemented_button.pack(pady=20)
         segemented_button.set("PlAY")  # set initial value
-
+        self.talkToServer= MCS.manageClientServer(socket.gethostbyname(socket.gethostname()),port=12345,
+                                                  clb_GetInf=self.clb_getConfif,
+                                                  clb_List=self.clb_list,
+                                                  clb_pipeline=self.clb_Pipeline)
+        self.talkToServer.connect()
 
 
         self.protocol("WM_DELETE_WINDOW",self.CloseALL)
@@ -39,42 +43,44 @@ class App(ctk.CTk):
                                              clb_master_SendPipeline=self.sendMessegePipe)
         self.ConfigFrame.grid(row=1,column=0,sticky ="NSWE") 
 
-        self.talkToServer= MCS.manageClientServer(socket.gethostbyname(socket.gethostname()),port=12345,
-                                                  clb_GetInf=None,
-                                                  clb_List=self.clb_list,
-                                                  clb_pipeline=None)
-        self.talkToServer.connect()
+
+    def clb_Pipeline(self, msg):
+        self.ConfigFrame.writeLog(msg)
+        return True
     def clb_DataOut(self, data):
         print(data)
-        pos=data[0]
-        vel=data[1]
+        T1=data[0]
+        T2=data[1]
+        T3=data[2]
+        T4=data[3]
+        print(T4)
         dataA = {
                 "ID":"TW1",
                 "CMD": "MOV",
-                "M1": pos[0],
-                "M2": pos[0],
-                "MV": vel
+                "M1": T1[1],
+                "M2": T1[1],
+                "MV": T1[0]
             }
         dataB = {
                 "ID":"TW2",
                 "CMD": "MOV",
-                "M1": pos[1],
-                "M2": pos[1],
-                "MV": vel
+                "M1": T2[1],
+                "M2": T2[1],
+                "MV": T2[0]
             }
         dataC = {
                 "ID":"TW3",
                 "CMD": "MOV",
-                "M1": pos[2],
-                "M2": pos[2],
-                "MV": vel
+                "M1": T3[1],
+                "M2": T3[1],
+                "MV": T3[0]
             }
         dataD = {
                 "ID":"TW4",
                 "CMD": "MOV",
-                "M1": pos[3],
-                "M2": pos[3],
-                "MV": vel
+                "M1": T4[1],
+                "M2": T4[1],
+                "MV": T4[0]
             }
         data_master={
             "CMD":"MOV",
@@ -96,15 +102,20 @@ class App(ctk.CTk):
         return True
 
     def setConfig(self,messege): #manda json 
-        print(messege)
+        self.talkToServer.setInfoDev(messege)
+
         return True
     def getConfig(self,messege):# recibe json
-        print(messege)
+ 
+        self.talkToServer.getInfoDev(messege)
         
         return True
+    def clb_getConfif(self, messege):
+
+        self.ConfigFrame.setValuesFromjson(messege)
     def sendMessegePipe(self, messege):#texto plano
         
-        print(messege)
+        self.talkToServer.sendPipeline(messege)
         return True
 
     def CloseALL(self):

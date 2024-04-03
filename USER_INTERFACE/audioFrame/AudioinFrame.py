@@ -111,48 +111,102 @@ class PlayFrame(ctk.CTkFrame):
         self.buffer=[]
         self.size=0
         self.ofset=0
+        self.countTime=0
+        self.fft_out=0
+        self.countTimeRender=0        
         self.redermi_hilo =threading.Thread(target=self.WaveFunction.render)
         self.waveType="triangular"
+
+        self.WaveFunction.visualizar_onda(self.waveType)
+        points=self.WaveFunction.getPoints(50,4)
+        out=self.prepareData(points,[0,0,0,0])
+        self.clb_DAtaOut(out)
+        self.WaveFunction.visualizar_recta(points)
+        self.WaveFunction.render()
+
+    def prepareData(self, points,power):
+        signal = [tupla[1] for tupla in points]
+        resultado = [list(map(float, x)) for x in zip(power, signal)]
+        return resultado
+    
     def clb_cmBox(self,choice):
         print(choice)
         self.waveType=choice
-    def clb_wav_play(self,data):
-        self.buffer.extend(data)
-        self.size+=len(data)
-        if((self.size>1024*10)):
-            fft_out=self.FFTWindow.compute(self.buffer,4)
-            self.FFTWindow.animation()
-            self.WaveFunction.clear()
-            self.WaveFunction.visualizar_onda(self.waveType)
-            x_intersecciones, y_intersecciones=self.WaveFunction.visualizar_recta(4,0.005,self.ofset)
-            valor_medio = np.mean(fft_out[::500])*10
-            self.clb_DAtaOut([y_intersecciones, valor_medio])
-            #print(str(x_intersecciones)+" "+str(y_intersecciones))
-            self.ofset+=0.0001
-            if self.ofset>(0.1-(0.005*3)):
-                self.ofset=0
-            self.WaveFunction.render()
-            self.buffer=[]
-            self.size=0
+        self.WaveFunction.clear()
 
-    def clb_wav_finish(self):
-        self.FFTWindow.clear()
-
-        self.actionStop()
+        self.WaveFunction.visualizar_onda(self.waveType)
+        self.WaveFunction.idx=0
+        points=self.WaveFunction.getPoints(50,4)
+        self.WaveFunction.visualizar_recta(points)
+        out=self.prepareData(points,[0,0,0,0])
+        self.clb_DAtaOut(out)
+        self.WaveFunction.render()
         
+    def clb_wav_play(self,data):
+
+        if((self.size<1024)):
+            self.buffer.extend(data)
+            self.size+=len(data)
+        else:
+            del self.buffer[0:1024]
+            self.buffer.extend(data)
+
+            
+        if self.countTime <50:
+            self.countTime+=1
+
+        else:
+            self.countTime=0
+
+            self.fft_out=self.FFTWindow.compute(self.buffer,4)
+
+            self.FFTWindow.animation()
+            
+        if  self.countTimeRender<325:
+            self.countTimeRender+=1
+        else:
+            self.WaveFunction.clear()
+            points=self.WaveFunction.getPoints(50,4)
+            self.WaveFunction.visualizar_onda(self.waveType)
+            self.WaveFunction.visualizar_recta(points)
+            self.WaveFunction.render()
+            self.countTimeRender=0
+            signal = [tupla[1] for tupla in points]
+            resultado = [list(map(float, x)) for x in zip(self.fft_out, signal)]
+            #print(data)
+            self.clb_DAtaOut(resultado)
+            #self.WaveFunction.clear()
+            #self.WaveFunction.visualizar_onda(self.waveType)
+            #x_intersecciones, y_intersecciones=self.WaveFunction.visualizar_recta(4,0.005,self.ofset)
+            #valor_medio = np.mean(fft_out[::500])*10
+            
+            ##print(str(x_intersecciones)+" "+str(y_intersecciones))
+            #self.ofset+=0.0001
+            #if self.ofset>(0.1-(0.005*3)):
+            #    self.ofset=0
+            #self.WaveFunction.render()
+            #self.buffer=[]
+            #self.size=0
+            
+    def clb_wav_finish(self):
+        points=self.WaveFunction.getPoints(50,4)
+        out=self.prepareData(points,[0,0,0,0])
+        self.clb_DAtaOut(out)
+        self.actionStop()
+
+
         
     def clb_mic_play(self,data,chunk):
         self.buffer.extend(data)
         self.size+=len(data)
         if((self.size>1024*10)):
             print(str(len(data))+"--------")
-            self.FFTWindow.compute(self.buffer,4)
-            self.FFTWindow.animation()
-            self.WaveFunction.clear()
-            self.WaveFunction.visualizar_onda(self.waveType)
-            x_intersecciones, y_intersecciones=self.WaveFunction.visualizar_recta(4,0.005,self.ofset)
-            cordenada=[x_intersecciones, y_intersecciones]
-            self.clb_DAtaOut(cordenada)
+            #self.FFTWindow.compute(self.buffer,4)
+            #self.FFTWindow.animation()
+            #self.WaveFunction.clear()
+            #self.WaveFunction.visualizar_onda(self.waveType)
+            #cordenada=[x_intersecciones, y_intersecciones]
+            #self.clb_DAtaOut(cordenada)
             #print(str(x_intersecciones)+" "+str(y_intersecciones))
             self.ofset+=0.001
             if self.ofset>(0.1-(0.005*3)):
@@ -164,15 +218,12 @@ class PlayFrame(ctk.CTkFrame):
     def get_Path(self):
         return self.subFrameFile.ruta
     def actionPlay(self):
+        
         self.typeOfStream=self.tabview._segmented_button.get()
         self.tabview._segmented_button.configure(state=ctk.DISABLED)
         if self.typeOfStream=="Lectura por Microfono":
-            
-       
             self.Mic.start_recording(self.subFrameMic.index())
         elif self.typeOfStream=="Lectura por archivo":
-            print("ARCHIVO")
-            print(self.subFrameFile.ruta)
             self.Wav.start_audio_file(self.subFrameFile.ruta,)
            
 
@@ -180,13 +231,10 @@ class PlayFrame(ctk.CTkFrame):
 
         self.Wav.toggle_pause()
         
-        print("Pause")
     
     def actionStop(self):
         self.tabview._segmented_button.configure(state=ctk.NORMAL)
-        if(not self.Wav.is_finish):
-            self.Wav.stream.stop_stream()
-            self.Wav.stream.close() 
+        self.Wav.stop()    
         self.Mic.stop()   
         print("STOP")
 

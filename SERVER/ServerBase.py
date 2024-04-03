@@ -7,13 +7,27 @@ PORT = 12345      # Puerto para la comunicación
 
 connections = {}
 connections_data=[]
+def buscar_y_reemplazar_por_nombre( nombre, nuevo_elemento):
+    for i, elemento in enumerate(connections_data):
+        if elemento.get('Name') == nombre:
+            del connections_data[i]  # Elimina el elemento de la lista
+            connections_data.append(nuevo_elemento)  # Agrega el nuevo elemento al final de la lista
+            return True  # Retorna True si se encontró y reemplazó el elemento
+    
+    return False
+
 def is_json(data):
     try:
         json.loads(data)
         return True
     except json.decoder.JSONDecodeError:
         return False
-    
+def detectar_ip_repetida(lista, ip_nuevo):
+    ips = [entry['client'][0] for entry in lista]
+    if ip_nuevo in ips:
+        return True  # La dirección IP ya existe en la lista
+    else:
+        return False  #
 def isNewclient(address):
     for client in connections_data:
         if  address == client["client"]:
@@ -31,6 +45,7 @@ def handle_client(client_socket, client_address):
             try:
                 # Decodifica los datos JSON
                 if not isNewclient(client_address):
+                    print("no existe")
                     if is_json(data.decode('utf-8')):
                         json_data = json.loads(data.decode('utf-8'))
                         client_data = {
@@ -39,34 +54,49 @@ def handle_client(client_socket, client_address):
                         "Name": json_data["name"],
                         "socket":client_socket
                         }
-                        connections_data.append(client_data)
+                        if not (buscar_y_reemplazar_por_nombre(json_data["name"],client_data)):
+                            print("Se agrega Nuevo")
+                            connections_data.append(client_data)  # Agrega el nuevo elemento al final de la lista
+                        else:
+                            print("Find and replace")
+                        
                     else:
                         print(data.decode('utf-8'))
                     json_data = "OK\n"
                     client_socket.send(json_data.encode('utf-8'))
                 else:
                     if is_json(data.decode('utf-8')):
-                            
-
-                            parsed_data = json.loads(data.decode('utf-8'))
-                            
-                            if "CMD" in parsed_data:
+                        parsed_data = json.loads(data.decode('utf-8'))
+                        if "CMD" in parsed_data:
                                 if parsed_data["CMD"]=="RES":
                                     indice = [index for index, client_data in enumerate(connections_data) if client_data["Name"] =="MASTER"]
-                                    messeg={
-                                       "M1": parsed_data["M1"],
-                                       "M2": parsed_data["M2"],
-                                       "MVI": parsed_data["MVI"]
-                                    }
-                                    print(indice)
-                                    json_data = json.dumps(messeg)
-                                    sendData(f"{json_data}", connections_data[indice[0]]["socket"])
+                                    print("Try Sending")
+                                    if indice==[]:
+                                        print("NO existe MASTER")
+                                    else:   
+                                        messeg={
+                                           "M1": parsed_data["M1"],
+                                           "M2": parsed_data["M2"],
+                                           "MVI": parsed_data["MVI"]
+                                        }
+                                        json_data = json.dumps(messeg)
+                                        sendData(f"{json_data}", connections_data[indice[0]]["socket"])
                                     
                                 if parsed_data["CMD"]=="SET":
+                                    indice = [index for index, client_data in enumerate(connections_data) if client_data["Name"] ==parsed_data["ID"]]
+                                    motorData=parsed_data["MX"]
+                                    if indice==[]:
+                                        print("NO existe MASTER")
+                                    else: 
+                                        messeg={
+                                            "CMD":"SET",
+                                            "M1": motorData["M1"],
+                                            "M2": motorData["M2"],
+                                            "MVI": motorData["MVI"]
+                                        }
+                                        json_data = json.dumps(messeg)
+                                        sendData(f"{json_data}", connections_data[indice[0]]["socket"])
                                     
-                                    
-
-                                    print(parsed_data)
                                 if parsed_data["CMD"]=="MOV":
                                     print("MOV")
                                     start_iterating = False
@@ -96,46 +126,44 @@ def handle_client(client_socket, client_address):
                                     
                                     print(parsed_data)
                                 if parsed_data["CMD"]=="HOME":
+                                    indice = [index for index, client_data in enumerate(connections_data) if client_data["Name"] ==parsed_data["ID"]]
+                                    print(indice)
+                                    if indice==[]:
+                                        print("no existe")
+                                    else:
+                                        data = {
+                                            "CMD": "HOME"
+                                        }
 
-
+                                    print(parsed_data)                                   
+                                if parsed_data["CMD"]=="GET":
+                                    indice = [index for index, client_data in enumerate(connections_data) if client_data["Name"] == parsed_data["ID"]]
+                                    print(indice)
+                                    if indice==[]:
+                                        print("no existe")
+                                    else:
+                                        data = {
+                                            "CMD": "GET"
+                                        }
+                                    json_data = json.dumps(data)
+                                    sendData(f"{json_data}", connections_data[indice[0]]["socket"])
                                     print(parsed_data)
                                 if parsed_data["CMD"]=="LIST":
                                     indice = [index for index, client_data in enumerate(connections_data) if client_data["Name"] =="MASTER"]
                                     filtered_names = [item['Name'] for item in connections_data if item['Name'] != 'MASTER']
                                     json_data = json.dumps(filtered_names)
                                     sendData(f"{json_data}", connections_data[indice[0]]["socket"])
+                                    print("LIST")
+                                if parsed_data["CMD"]=="PIPE":
+                                    msg=parsed_data["MSG"]
+                                    print(msg)
+                                    switch_case(msg)
 
-                                    print(connections_data)
-
-
-                            #for data in parsed_data:
-                            #    ID  = data ["ID"]
-                            #    CMD = data["CMD"]
-                            #    M1 = data["M1"]
-                            #    M2 = data["M2"]
-                            #    MV = data["MV"]
-                            #    indice = [index for index, client_data in enumerate(connections_data) if client_data["Name"] ==ID]
-                            #    if indice==[]:
-                            #        print("no existe")
-                            #    else:
-                            #        data = {
-                            #            "CMD": "MOV",
-                            #            "M1": M1,
-                            #            "M2": M2,
-                            #            "MV":MV
-                            #        }
-                            #        json_data = json.dumps(data)
-                            #        sendData(f"{json_data}", connections_data[indice[0]]["socket"])
-#
-#
-                    else:
-                        print(data.decode('utf-8'))
-                    #print(f"Recibido desde {client_address}: {json_data}")
 
                     # Procesa los datos según sea necesario
                     
                     # Envía una respuesta al cliente
-                    
+                    print("response")
                     json_data = "OK\n"
                     client_socket.send(json_data.encode('utf-8'))
 
@@ -184,7 +212,7 @@ def switch_case(option):
         return "Opción 2 seleccionada"
     elif rama[0] == "GET":
         indice = [index for index, client_data in enumerate(connections_data) if client_data["Name"] == rama[1]]
-        
+        print(indice)
         if indice==[]:
             print("no existe")
         else:

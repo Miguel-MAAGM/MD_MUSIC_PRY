@@ -39,19 +39,28 @@ class infDevFrame(ctk.CTkFrame):
         self.cofingDevFrame.grid(row=0, column=0,padx=10,pady=10,columnspan=2,sticky="nsew")
         self.LogFrame.grid(row=1,column=0,padx=10,pady=10,rowspan=2,columnspan=3,sticky="nsew")
 
-    
+    def writeLog(self,data):
+        self.LogFrame.recibeEvent(data)
+        return True
     def M_clb_GET(self):
-
-        self.callBack_Get(self.listDevFrame.getSelectDevice())
-        print("GET_INFO")
+        if not self.listDevFrame.getSelectDevice()=="No device":
+            self.callBack_Get(self.listDevFrame.getSelectDevice())
+        
     def M_clb_SET(self):
-        self.callBack_Set(self.cofingDevFrame.getValues())
+        pack= {
+            "CMD":"SET",
+            "ID": self.listDevFrame.getSelectDevice(),
+            "MX": self.cofingDevFrame.getValues()
+        }
+        self.callBack_Set(pack)
         print("SET_INFO")
 
     def M_clb_RFH(self):
         self.callBack_Refresh()
         print("SET_REFRESH")
-    
+    def setValuesFromjson(self, data):
+        print(data)
+        self.cofingDevFrame.setValues(data)
     def setListDev(self,messege):
         self.listDevFrame.refreshListDev(messege)
 

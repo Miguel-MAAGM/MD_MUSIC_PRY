@@ -41,12 +41,13 @@ class manageClientServer:
         while self.connected:
             try:
                 response = self.socket.recv(1024)
-                print(response)
                 if(self.is_json(response.decode('utf-8'))):
                     response_data = json.loads(response.decode('utf-8'))
-                    print("Paquete recibido como JSON:", response_data)
                     if not len(self.type)==0:
                         self.switch_case(self.type.pop(0),response_data)
+                elif len(self.type)>0 and self.type[0]=="PIPE":
+                    print("For PIPE")
+                    self.switch_case(self.type.pop(0),response.decode('utf-8'))
             except ConnectionAbortedError:
                 print("La conexión fue anulada por el software en el equipo host.")
                 break
@@ -75,8 +76,10 @@ class manageClientServer:
         json_data = json.dumps(data)
         self.send(json_data)
         self.type.append("GET_Data")
+
         return 
     def setInfoDev(self,messege):
+
         json_data = json.dumps(messege)
         self.send(json_data)
         return
@@ -88,10 +91,19 @@ class manageClientServer:
         self.send(json_data)
         self.type.append("LIST")
          
-    def sendPoint(self,messege):
-        
-        return
 
+    def sendPipeline(self,data):
+
+        complexData={
+            "CMD":"PIPE",
+            "MSG":data
+        }
+        json_data = json.dumps(complexData)
+
+        self.send(json_data)
+        self.type.append("PIPE")
+
+        return True
 
     def case_default(self):
         print("Type no Valid")
@@ -112,6 +124,8 @@ class manageClientServer:
            self.response_List(messege)
         if (Type=="GET_Data"):
            self.response_GetData(messege)
+        if (Type=="PIPE"):
+            self.response_Pipeline(messege)
 
 def calb(data):
     print(data)

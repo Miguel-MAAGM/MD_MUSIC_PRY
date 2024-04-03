@@ -5,6 +5,7 @@ import numpy as np
 import time
 from scipy.fft import fft
 import random
+import asyncio
 class canvasMat(ctk.CTkFrame):
     def __init__(self,master,clb_PLAY=None,**kwargs):
         super().__init__(master, **kwargs)
@@ -18,6 +19,8 @@ class canvasMat(ctk.CTkFrame):
         self.ax.grid(True,color="#f3f6f4")
         self.fig.set_facecolor("#212121")
         self.ax.set_facecolor("#212121")
+        self.ax.set_ylim(0, 1.2) 
+        self.ax.set_xlim(0, 8) 
         self.ax.tick_params(axis='x', colors='#f3f6f4')  # Cambiar color de los ejes X a rojo
         self.ax.tick_params(axis='y', colors='#f3f6f4')  # Cambiar color de los ejes Y a verde
         self.plot_canvas = FigureCanvasTkAgg(self.fig, master=self)
@@ -27,10 +30,13 @@ class canvasMat(ctk.CTkFrame):
         self.x_data = []
         self.y_data = []
         self.pilar =0
-        
+        self.arrayOLD=[]
         self.promedios_partes=[]
         self.animation()
-
+    def obtener_4_maximos(self,array):
+        array_ordenado = sorted(array, reverse=True)
+        maximos = array_ordenado[:4]
+        return maximos
     def compute(self,frame,pilar):
         self.pilar=pilar
         # Calcula la FFT del frame
@@ -42,7 +48,7 @@ class canvasMat(ctk.CTkFrame):
 
         # Normaliza los valores absolutos de la FFT
         normalized_fft_frame = abs_fft_frame / np.max(abs_fft_frame)
-        self.promedios_partes =normalized_fft_frame[:len(frame)//5] 
+        self.promedios_partes =self.obtener_4_maximos(normalized_fft_frame[10:len(frame)//5])
         
         return  self.promedios_partes
         # Divide el frame en cuatro partes
@@ -57,6 +63,13 @@ class canvasMat(ctk.CTkFrame):
         for i in range(1, num + 1):
             string_list.append("Pilar " + str(i))
         return string_list
+    def calcular_valor_medio_arrays(self, array1, array2):
+        # Verificar que los dos arrays tengan la misma longitud
+        if len(array1) != len(array2):
+            return array1
+        # Calcular el valor medio de cada par de elementos en las mismas posiciones
+        valores_medios = [(a + b) / 2 for a, b in zip(array1, array2)]
+        return valores_medios
     def animation(self):
         
     
@@ -69,14 +82,19 @@ class canvasMat(ctk.CTkFrame):
         self.ax.tick_params(axis='x', colors='#f3f6f4')  # Cambiar color de los ejes X a rojo
         self.ax.tick_params(axis='y', colors='#f3f6f4')  # Cambiar color de los ejes Y a verde
         #partes_labels = self.generate_string_list(self.pilar)
-        print(len(self.promedios_partes))
-        self.ax.plot(range(len(self.promedios_partes)), self.promedios_partes)
+        self.ax.set_ylim(0, 1.2) 
+        self.ax.set_xlim(-1, 5) 
+        random.shuffle(self.promedios_partes)
+        value= self.calcular_valor_medio_arrays(self.promedios_partes, self.arrayOLD)
+        self.ax.bar(range(len(self.promedios_partes)), value,width=0.5)
+        self.arrayOLD=value
         self.plot_canvas.draw()
+
     def clear(self):
         self.ax.clear()
         self.plot_canvas.draw()
 
-
+    
 
 def generar_señal(fs, duracion, f1, f2, f3, f4, A1=1, A2=1000, A3=1, A4=1):
     t = np.linspace(0, duracion, int(fs * duracion))

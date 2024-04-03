@@ -20,24 +20,44 @@ class AudioManagerFile():
         self.callback_finish=callback_finish
         self.rate=0
         self.size=0
-        self.chunk=2304
+        self.chunk=1024
         self.total_frames_read = 0  # Inicializar el contador de frames leídos
+        self.isRuning=False
+    def play_audio(self):
         
-    def play_audio(self,in_data, frame_count, time_info, status):
-        
-        raw_data = self.wf.readframes(frame_count)
-        data = np.frombuffer(raw_data, dtype=np.int16)
-        if self.wf.getnchannels()==2:
-            data_combined = data[::self.wf.getnchannels()] + data[1::self.wf.getnchannels()]
-            self.callback_data(data_combined)        
-        else:
-            self.callback_data(data)        
+        while True:
+            if not self.force_breake:
+                if not self.paused :
+                    raw_data = self.wf.readframes(self.chunk)
+                    
+                    if len(raw_data)>0:
+                        data = np.frombuffer(raw_data, dtype=np.int16)
+                        data_combined = data[::self.wf.getnchannels()] + data[1::self.wf.getnchannels()]
+                        self.stream.write(raw_data)
+                        self.callback_data(data_combined)
+                    else:
+                        self.is_finish = True
+                        self.callback_finish()
+                        break
+            else:
+                self.is_finish = True
+                self.callback_finish()
+                break
 
-        if self.chunk>len(raw_data) :
-            self.is_finish=True
-            self.callback_finish()
+            #data = np.frombuffer(raw_data, dtype=np.int16)
+            #if self.wf.getnchannels()==2:
+            #    data_combined = data[::self.wf.getnchannels()] + data[1::self.wf.getnchannels()]
+            #    self.callback_data(data_combined)        
+            #else:
+            #    print("")
+            #    self.callback_data(data)        
+#
+            #if self.chunk>len(raw_data) :
+            #    self.is_finish=True
+            #    self.callback_finish()
 
-        return(data, pyaudio.paContinue)
+            #return(data, pyaudio.paContinue)
+
 
     def start_audio_file(self,audio_file="", start_time=0):
         if self.audio_file =="":
@@ -60,27 +80,26 @@ class AudioManagerFile():
                                      channels=self.wf.getnchannels(),
                                      rate=self.wf.getframerate(),
                                      output=True,
-                                     stream_callback=self.play_audio,
                                      start =False)
 
         self.wf.setpos(self.start_position)
         self.stream.start_stream()
-       # self.play_thread = threading.Thread(target=self.play_audio)
-        #self.play_thread.start()
+        self.play_thread = threading.Thread(target=self.play_audio)
+        self.play_thread.start()
+        self.isRuning=True
     def isFinish(self):
         return self.is_finish
     def toggle_pause(self):
-        if self.stream.is_active():
-            self.stream.stop_stream()
-        else :
-            self.stream.start_stream()
-
+        self.paused=not self.paused
     def event_Jump(self,time):
             self.force_breake=True
             self.wf.setpos(int(time * self.audio.get_default_input_device_info()['defaultSampleRate']))
             self.force_breake=False
     def get_rate(self):
         return self.rate
+    def stop(self):
+        self.force_breake=True
+        
 class AudioManagerMic():
     def __init__(self,callback_data=None):
         self.CHUNK = 1024
@@ -91,7 +110,7 @@ class AudioManagerMic():
         self.stream=None 
         self.clb=callback_data
         self.p = pyaudio.PyAudio()
-
+        self.isRuning=False
     def set_input_device(self, device_index):
         self.device_index = device_index
 
@@ -110,8 +129,11 @@ class AudioManagerMic():
                              input_device_index=self.device_index,
                              stream_callback=self.callback)
         self.stream.start_stream()
+        self.isRuning=True
     def stop(self):
-        self.stream.stop_stream()
-        self.stream.close()
+        if self.isRuning:
+            self.stream.stop_stream()
+            self.stream.close()
+            self.isRuning=False
 
 
